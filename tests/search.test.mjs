@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {matches,notionURL} from '../web/logic.mjs';
+const pair={characters:['a','b']}, trio={characters:['a','b','c']};
+assert.equal(matches(pair,new Set(['a','b']),'all'),true);
+assert.equal(matches(trio,new Set(['a','b']),'all'),true);
+assert.equal(matches(trio,new Set(['a','b']),'exact'),false);
+assert.equal(matches(pair,new Set(['a','b']),'exact'),true);
+assert.equal(matches(pair,new Set(['c']),'all'),false);
+assert.equal(matches({characters:['a']},new Set(['a']),'exact'),true);
+for(const bad of ['javascript:alert(1)','https://notion.so.evil.example/x','http://notion.so/x']) assert.equal(notionURL(bad),null);
+assert.equal(notionURL('https://app.notion.com/p/123'),'https://app.notion.com/p/123');
+console.log('検索条件・URL検証: 10 checks passed');
