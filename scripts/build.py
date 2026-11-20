@@ -144,9 +144,20 @@ def aggregate(characters, sessions):
             counts[k].update(combinations(ids, n))
         if len(ids) == 2:
             counts['duel'][tuple(ids)] += 1
-    ranks = {k: [{'characters': list(group), 'count': n} for group, n in
-                sorted(counter.items(), key=lambda row: (-row[1], tuple(order[i] for i in row[0])))[:3]]
-             for k, counter in counts.items()}
+    ranks = {}
+    for kind, counter in counts.items():
+        rows = sorted(counter.items(), key=lambda row: (-row[1], tuple(order[i] for i in row[0])))
+        rankings = []
+        previous_count = None
+        rank = 0
+        for position, (group, count) in enumerate(rows, start=1):
+            if count != previous_count:
+                rank = position
+            if rank > 3:
+                break
+            rankings.append({'characters': list(group), 'count': count, 'rank': rank})
+            previous_count = count
+        ranks[kind] = rankings
     sessions.sort(key=lambda s: s['id'])
     sessions.sort(key=lambda s: s['date'] or '', reverse=True)
     return {'schemaVersion': 1, 'generatedAt': datetime.now(timezone.utc).isoformat(),

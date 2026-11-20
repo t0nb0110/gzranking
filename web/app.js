@@ -38,7 +38,13 @@ async function init() {
     const names = new Map(data.characters.map(c=>[c.id,c.name]));
     for(const [key,title] of [['combo','コンビ TOP 3'],['trio','トリオ TOP 3'],['duel','タイマン TOP 3']]) {
       const card=node('article',undefined,'card'); card.append(node('h3',title)); const list=node('ol');
-      for(const r of data.rankings[key]) { const li=node('li'); li.append(node('span',r.characters.map(id=>names.get(id)).join(' × ')),node('strong',`${r.count} 卓`)); list.append(li); }
+      let previousCount, rank = 0;
+      for(const [index,r] of data.rankings[key].entries()) {
+        if(r.count !== previousCount) rank = index + 1;
+        previousCount = r.count;
+        const li=node('li'); li.value = r.rank ?? rank;
+        li.append(node('span',r.characters.map(id=>names.get(id)).join(' × ')),node('strong',`${r.count} 卓`)); list.append(li);
+      }
       card.append(list.children.length ? list : node('p','まだ共演の記録がありません。')); $('rankings').append(card);
     }
     $('updated').textContent=`更新 ${new Date(data.generatedAt).toLocaleString('ja-JP',{timeZone:data.timezone || 'Asia/Tokyo'})} / ${data.characters.length}キャラ・${data.sessions.length}卓`;
