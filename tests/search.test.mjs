@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {matches,notionURL} from '../web/logic.mjs';
+import {matches,notionURL,groupRankings} from '../web/logic.mjs';
 const pair={characters:['a','b']}, trio={characters:['a','b','c']};
 assert.equal(matches(pair,new Set(['a','b']),'all'),true);
 assert.equal(matches(trio,new Set(['a','b']),'all'),true);
@@ -10,3 +10,12 @@ assert.equal(matches({characters:['a']},new Set(['a']),'exact'),true);
 for(const bad of ['javascript:alert(1)','https://notion.so.evil.example/x','http://notion.so/x']) assert.equal(notionURL(bad),null);
 assert.equal(notionURL('https://app.notion.com/p/123'),'https://app.notion.com/p/123');
 console.log('検索条件・URL検証: 10 checks passed');
+
+const rows = [13,13,9,9,9,7,6].map((count,i)=>({count,characters:[String(i)]}));
+const grouped = groupRankings(rows);
+assert.deepEqual(grouped.map(g=>g.rank), [1,2,3]);
+assert.deepEqual(grouped.map(g=>g.count), [13,9,7]);
+assert.deepEqual(grouped.map(g=>g.rows.length), [2,3,1]);
+assert.deepEqual(grouped[1].rows.map(r=>r.characters[0]), ['2','3','4']);
+assert.deepEqual(groupRankings([]), []);
+console.log('同率グループ表示: 5 checks passed');

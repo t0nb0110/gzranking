@@ -31,9 +31,14 @@ class Tests(unittest.TestCase):
         # Four first-place groups are all shown, with no fourth-place group.
         result = aggregate(chars, sessions([['a','e'],['a','d'],['a','c'],['a','b']]))
         self.assertEqual([r['rank'] for r in result['rankings']['combo']], [1,1,1,1])
-        # Standard competition ranking: 1, 1, 3 (then 4 is excluded).
+        # Dense ranking: ties do not skip the next count level.
         result = aggregate(chars, sessions([['a','b']]*3 + [['a','c']]*3 + [['a','d']]*2 + [['a','e']]))
-        self.assertEqual([r['rank'] for r in result['rankings']['combo']], [1,1,3])
+        self.assertEqual([r['rank'] for r in result['rankings']['combo']], [1,1,2,3])
+        groups = ([['a','b']]*13 + [['a','c']]*13 + [['a','d']]*9 + [['a','e']]*9 + [['b','c']]*9 + [['b','d']]*7 + [['b','e']]*6)
+        result = aggregate(chars, sessions(groups))
+        for key in ('combo','duel'):
+            self.assertEqual([r['rank'] for r in result['rankings'][key]], [1,1,2,2,2,3])
+            self.assertEqual([r['count'] for r in result['rankings'][key]], [13,13,9,9,9,7])
         # Trio cutoff uses the same policy.
         result = aggregate(chars, sessions([['a','b','c']]*4 + [['a','b','d']]*3 + [['a','b','e']]*2 + [['b','c','d']]*2))
         self.assertEqual([r['rank'] for r in result['rankings']['trio']], [1,2,3,3])

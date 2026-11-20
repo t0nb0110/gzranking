@@ -4,7 +4,7 @@
 <meta name="referrer" content="no-referrer"><title>同卓ノート</title><link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script></head>
 <body><main><header><h1>同卓ノート</h1><p id="updated" class="muted"></p></header>
 <p id="notice" role="status">データを読み込んでいます…</p>
-<section aria-labelledby="rank-heading"><h2 id="rank-heading">同卓ランキング</h2><p class="muted">「終了」「現行」を集計して同率3位まで全組表示します。</p><div id="rankings" class="rankings"></div></section>
+<section aria-labelledby="rank-heading"><h2 id="rank-heading">同卓ランキング</h2><p class="muted">「終了」「現行」を集計。同卓数の上位3段階を表示。同率の組はidx順。</p><div id="rankings" class="rankings"></div></section>
 <section aria-labelledby="search-heading"><h2 id="search-heading">セッションを探す</h2><label for="character-search">キャラクター名を絞り込む</label><input id="character-search" type="search" placeholder="名前で検索" disabled>
 <div id="characters" class="characters" role="group" aria-label="キャラクター選択"></div><p id="selected"></p><button id="clear" disabled>選択を解除</button>
 <fieldset disabled id="modes"><legend>参加条件</legend><label><input type="radio" name="mode" value="all" checked>全員参加 <small>ほかのキャラも参加可</small></label><label><input type="radio" name="mode" value="exact">選択者のみ参加 <small>参加者が完全一致</small></label></fieldset>

@@ -1,4 +1,4 @@
-import { matches, notionURL } from './logic.mjs';
+import { matches, notionURL, groupRankings } from './logic.mjs';
 const $ = id => document.getElementById(id);
 const selected = new Set();
 let data, mode = 'all', limit = 50;
@@ -38,12 +38,13 @@ async function init() {
     const names = new Map(data.characters.map(c=>[c.id,c.name]));
     for(const [key,title] of [['combo','コンビ TOP 3'],['trio','トリオ TOP 3'],['duel','タイマン TOP 3']]) {
       const card=node('article',undefined,'card'); card.append(node('h3',title)); const list=node('ol');
-      let previousCount, rank = 0;
-      for(const [index,r] of data.rankings[key].entries()) {
-        if(r.count !== previousCount) rank = index + 1;
-        previousCount = r.count;
-        const li=node('li'); li.value = r.rank ?? rank;
-        li.append(node('span',r.characters.map(id=>names.get(id)).join(' × ')),node('strong',`${r.count} 卓`)); list.append(li);
+      for(const group of groupRankings(data.rankings[key])) {
+        const li=node('li'); li.value = group.rank;
+        const pairs=node('div',undefined,'rank-pairs');
+        for(const row of group.rows) {
+          pairs.append(node('div',row.characters.map(id=>names.get(id)).join(' + ')));
+        }
+        li.append(pairs,node('strong',`${group.count} 卓`)); list.append(li);
       }
       card.append(list.children.length ? list : node('p','まだ共演の記録がありません。')); $('rankings').append(card);
     }

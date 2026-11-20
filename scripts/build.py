@@ -150,9 +150,9 @@ def aggregate(characters, sessions):
         rankings = []
         previous_count = None
         rank = 0
-        for position, (group, count) in enumerate(rows, start=1):
+        for group, count in rows:
             if count != previous_count:
-                rank = position
+                rank += 1
             if rank > 3:
                 break
             rankings.append({'characters': list(group), 'count': count, 'rank': rank})

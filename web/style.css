@@ -7,7 +7,7 @@
   color-scheme: light dark;
   --line: #e9e9e7;
   --muted: #787774;
-  --hover: #fff;
+  --hover: #f7f7f5;
   --selected: #efefed;
 }
 * { box-sizing: border-box; }
@@ -28,8 +28,9 @@ section { margin-bottom: 32px; }
 .card ol { margin: 0; padding-left: 24px; }
 .card li { padding: 8px 0 8px 2px; border-bottom: 1px solid var(--line); }
 .card li::marker { color: var(--muted); font-size: 14px; }
-.card li span { overflow-wrap: anywhere; }
-.card strong { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+.rank-pairs { overflow-wrap: anywhere; }
+.rank-pairs > div + div { margin-top: 4px; }
+.card strong { display: block; margin-top: 6px; font-size: 14px; font-weight: 400; color: var(--muted); }
 input[type=search] { display: block; width: 100%; font: inherit; border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; margin: 8px 0 12px; background: transparent; color: inherit; }
 .characters { display: flex; flex-wrap: wrap; gap: 4px 8px; max-height: 260px; overflow: auto; padding: 3px; }
 .chip { border-radius: 3px; padding: 4px 8px; cursor: pointer; font-size: 14px; }
