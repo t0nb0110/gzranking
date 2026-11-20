@@ -82,8 +82,9 @@ class Notion:
 def check_schema(api, source, expected):
     schema = api.request('GET', f'data_sources/{source}')['properties']
     for name, kind in expected.items():
-        if name not in schema or schema[name]['type'] != kind:
-            raise ValueError(f'プロパティ「{name}」は {kind} 型で用意してください')
+        allowed = (kind,) if isinstance(kind, str) else kind
+        if name not in schema or schema[name]['type'] not in allowed:
+            raise ValueError(f'プロパティ「{name}」は {" または ".join(allowed)} 型で用意してください')
 
 
 def title(api, page):
@@ -104,6 +105,33 @@ def day(value, tz, source_timezone=None):
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=ZoneInfo(source_timezone) if source_timezone else tz)
     return parsed.astimezone(tz).strftime('%Y/%m/%d')
+
+
+def session_date(prop, tz):
+    """Read a native date or a formula whose result is a date (or empty)."""
+    kind = prop.get('type')
+    if kind == 'date' or (kind is None and 'date' in prop):
+        value = prop.get('date')
+    elif kind == 'formula':
+        result = prop.get('formula') or {}
+        result_type = result.get('type')
+        if result_type == 'date':
+            value = result.get('date')
+        elif result_type == 'string' and result.get('string') in (None, ''):
+            # A formula may return an empty string in its undated branch.
+            value = None
+        else:
+            raise ValueError('プロパティ「*start」の数式は日付を返す必要があります。formatDate()等の文字列ではなく日付を返してください（空文字は可）')
+    else:
+        raise ValueError('プロパティ「*start」は日付、または日付を返す数式にしてください')
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not isinstance(value.get('start'), str):
+        raise ValueError('プロパティ「*start」の日付データが不正です')
+    try:
+        return day(value['start'], tz, value.get('time_zone'))
+    except ValueError:
+        raise ValueError('プロパティ「*start」の日付を読み取れませんでした') from None
 
 
 def aggregate(characters, sessions):
@@ -127,7 +155,7 @@ def aggregate(characters, sessions):
 
 def export(api, session_source, character_source, tz):
     check_schema(api, character_source, {'名前': 'title', 'idx': 'number'})
-    check_schema(api, session_source, {'名前': 'title', '*start': 'date', '状況': 'status', '▶ PC': 'relation'})
+    check_schema(api, session_source, {'名前': 'title', '*start': ('date', 'formula'), '状況': 'status', '▶ PC': 'relation'})
     chars = []
     for p in api.query(character_source):
         if not p.get('in_trash'):
@@ -150,8 +178,7 @@ def export(api, session_source, character_source, tz):
         parsed = urlparse(url)
         if parsed.scheme != 'https' or not (parsed.hostname == 'notion.so' or (parsed.hostname or '').endswith('.notion.so') or parsed.hostname == 'notion.com' or (parsed.hostname or '').endswith('.notion.com') or (parsed.hostname or '').endswith('.notion.site')):
             raise ValueError('想定外のNotionページURLです')
-        date = props['*start']['date']
-        sessions.append({'id': p['id'], 'title': title(api, p), 'date': day(date['start'] if date else None, tz, date.get('time_zone') if date else None), 'url': url, 'characters': ids})
+        sessions.append({'id': p['id'], 'title': title(api, p), 'date': session_date(props['*start'], tz), 'url': url, 'characters': ids})
     result = aggregate(chars, sessions)
     result['timezone'] = str(tz)
     return result
