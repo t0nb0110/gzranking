@@ -7,7 +7,7 @@
   color-scheme: light dark;
   --line: #e9e9e7;
   --muted: #787774;
-  --hover: #f7f7f5;
+  --hover: #fff;
   --selected: #efefed;
 }
 * { box-sizing: border-box; }
